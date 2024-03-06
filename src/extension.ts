@@ -67,12 +67,12 @@ function getTaskFromTodo(todo: string, lines: Array<string>) {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
-    if (line === `# ${category}`) {
+    if (line === `--- ${category}`) {
       inCategory = true
       continue
     }
     if (inCategory) {
-      if (line === `## ${subject}`) {
+      if (line === `-- ${subject}`) {
         inSubject = true
         continue
       }
