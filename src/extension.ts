@@ -26,7 +26,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // statusBarItem.backgroundColor = new vscode.ThemeColor(
   //   'statusBarItem.warningBackground'
   // )
-  statusBarItem.color = new vscode.ThemeColor('button.background')
+  statusBarItem.color = new vscode.ThemeColor(
+    'ports.iconRunningProcessForeground'
+  )
 
   const watcher = vscode.workspace.createFileSystemWatcher(
     new vscode.RelativePattern(context.globalStorageUri.fsPath, tasksFileName)
@@ -58,22 +60,84 @@ async function ensureTasksFileExists(globalStorageUriPath: string) {
   }
 }
 
+function getTaskFromTodo(todo: string, lines: Array<string>) {
+  const [category, subject, taskNr] = todo.split(':')
+  let inCategory = false,
+    inSubject = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (line === `# ${category}`) {
+      inCategory = true
+      continue
+    }
+    if (inCategory) {
+      if (line === `## ${subject}`) {
+        inSubject = true
+        continue
+      }
+    }
+    if (inSubject) {
+      if (line.startsWith('- ')) {
+        return line.slice(2)
+      }
+      if (line.startsWith('# ') || line.startsWith('## ')) {
+        // we are not the the target subject anymore
+        return null
+      }
+    }
+  }
+  return null
+}
+
+function getCurrentTaskFromFile(file: string) {
+  let mode: 'todo' | 'tasks' = 'tasks'
+
+  let lines = file.split('\n')
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+
+    if (line === 'TODO') {
+      mode = 'todo'
+      continue
+    }
+    if (line === 'TASKS') {
+      mode = 'tasks'
+      continue
+    }
+
+    if (mode === 'todo') {
+      if (line) {
+        const maybeTask = getTaskFromTodo(line, lines)
+        if (maybeTask) {
+          return maybeTask
+        } else {
+          continue
+        }
+      }
+    }
+
+    if (mode === 'tasks') {
+      if (line.startsWith('- ')) {
+        return line.slice(2)
+      }
+    }
+  }
+  return null
+}
+
 async function updateStatusBarItem() {
   if (!statusBarItem || !tasksFilePath) return
-  const tasks = await readFile(tasksFilePath, {
+  const fileText = await readFile(tasksFilePath, {
     encoding: 'utf-8',
   })
-  try {
-    tasks.split('\n').forEach((line) => {
-      if (line.startsWith('- ')) {
-        const task = line.slice(2)
-        statusBarItem.text = task
-        throw null
-      }
-    })
-    statusBarItem.text = ''
-  } catch {}
-  statusBarItem.show()
+  const task = getCurrentTaskFromFile(fileText)
+  if (task) {
+    statusBarItem.text = task
+    statusBarItem.show()
+  } else {
+    statusBarItem.hide()
+  }
 }
 
 export function deactivate() {}
