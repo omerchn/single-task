@@ -82,7 +82,7 @@ function getTaskFromTodo(todo: string, lines: Array<string>) {
         return line.slice(2)
       }
       if (line.startsWith('-- ') || line.startsWith('--- ')) {
-        // we are not the the target subject anymore
+        // we are not in the target subject anymore
         return null
       }
     }
