@@ -81,7 +81,7 @@ function getTaskFromTodo(todo: string, lines: Array<string>) {
       if (line.startsWith('- ')) {
         return line.slice(2)
       }
-      if (line.startsWith('# ') || line.startsWith('## ')) {
+      if (line.startsWith('-- ') || line.startsWith('--- ')) {
         // we are not the the target subject anymore
         return null
       }
