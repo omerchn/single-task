@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
   //   'statusBarItem.warningBackground'
   // )
   statusBarItem.color = new vscode.ThemeColor(
-    'ports.iconRunningProcessForeground'
+    'gitDecoration.modifiedResourceForeground'
   )
 
   const watcher = vscode.workspace.createFileSystemWatcher(
@@ -133,7 +133,7 @@ async function updateStatusBarItem() {
   })
   const task = getCurrentTaskFromFile(fileText)
   if (task) {
-    statusBarItem.text = task
+    statusBarItem.text = `TODO: ${task}`
     statusBarItem.show()
   } else {
     statusBarItem.hide()
