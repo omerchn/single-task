@@ -2,7 +2,7 @@ import { existsSync } from 'fs'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import * as vscode from 'vscode'
 
-const tasksFileName = 'tasks.txt'
+const tasksFileName = 'tasks.md'
 
 let statusBarItem: vscode.StatusBarItem
 let tasksFilePath: string
